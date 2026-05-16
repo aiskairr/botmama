@@ -1,10 +1,11 @@
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 TOKEN = os.getenv("BOT_TOKEN")
 import sys
 import time
