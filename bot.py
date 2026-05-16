@@ -6,8 +6,21 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
+import sys
+import time
+
+# Debug: покажем в логах, доступна ли переменная окружения (НЕ выводим сам токен)
+if TOKEN:
+    try:
+        print(f"BOT_TOKEN present, length={len(TOKEN)}")
+    except Exception:
+        print("BOT_TOKEN present")
+else:
+    print("BOT_TOKEN not set in environment")
 if not TOKEN:
     print("Ошибка: установите переменную окружения BOT_TOKEN в файле .env или окружении")
+    # Подождём немного чтобы логи успели отправиться, затем выйдем
+    time.sleep(1)
     raise SystemExit(1)
 
 CONGRATS = (
