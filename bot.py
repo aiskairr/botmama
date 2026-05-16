@@ -3,25 +3,21 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from telegram import Update
+from telegram.error import InvalidToken
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
-TOKEN = os.getenv("BOT_TOKEN")
-import sys
-import time
+ENV_PATH = Path(__file__).with_name(".env")
+load_dotenv(dotenv_path=ENV_PATH, override=True)
+TOKEN = (os.getenv("BOT_TOKEN") or "").strip().strip('"').strip("'")
 
 # Debug: покажем в логах, доступна ли переменная окружения (НЕ выводим сам токен)
 if TOKEN:
-    try:
-        print(f"BOT_TOKEN present, length={len(TOKEN)}")
-    except Exception:
-        print("BOT_TOKEN present")
+    print(f"BOT_TOKEN present, length={len(TOKEN)}")
 else:
     print("BOT_TOKEN not set in environment")
-if not TOKEN:
-    print("Ошибка: установите переменную окружения BOT_TOKEN в файле .env или окружении")
-    # Подождём немного чтобы логи успели отправиться, затем выйдем
-    time.sleep(1)
+
+if not TOKEN or "ВАШ_ТОКЕН" in TOKEN or "BOTFATHER" in TOKEN.upper() or TOKEN == "your_telegram_bot_token_here":
+    print(f"Ошибка: установите настоящий BOT_TOKEN в файле {ENV_PATH} или в переменных Railway")
     raise SystemExit(1)
 
 CONGRATS = (
@@ -55,7 +51,11 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, congrats_handler))
     print("Бот запущен. Ожидание сообщений...")
-    app.run_polling()
+    try:
+        app.run_polling()
+    except InvalidToken:
+        print("Ошибка: Telegram отклонил BOT_TOKEN. Получите новый токен у @BotFather и обновите .env/Railway Variables.")
+        raise SystemExit(1)
 
 if __name__ == "__main__":
     main()
